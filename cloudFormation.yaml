@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Creates IAM Users, Groups, and a temporary password in Secrets Manager
+  for a lab on automated IAM resource provisioning.
+
+Resources:
+  UserPasswordSecretBenedict2:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Description: 'Temporary password for IAM users'
+      GenerateSecretString:
+        PasswordLength: 16
+        ExcludePunctuation: true
+
+  EC2UserGroupBenedict2:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      GroupName: EC2GroupBenedict2
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess'
+        - 'arn:aws:iam::aws:policy/IAMUserChangePassword'
+
+  S3UserGroupBenedict2:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      GroupName: S3GroupBenedict2
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+        - 'arn:aws:iam::aws:policy/IAMUserChangePassword'
+
+  EC2UserBenedict2:
+    Type: 'AWS::IAM::User'
+    DependsOn:
+      - UserPasswordSecretBenedict2
+      - EC2UserGroupBenedict2
+    Properties:
+      UserName: ec2-user-benedict2
+      Groups:
+        - !Ref EC2UserGroupBenedict2
+      LoginProfile:
+        Password: !Sub '{{resolve:secretsmanager:${UserPasswordSecretBenedict2}}}'
+        PasswordResetRequired: true
+
+  S3UserBenedict:
+    Type: 'AWS::IAM::User'
+    DependsOn:
+      - UserPasswordSecretBenedict2
+      - S3UserGroupBenedict2
+    Properties:
+      UserName: s3-user-benedict2
+      Groups:
+        - !Ref S3UserGroupBenedict2
+      LoginProfile:
+        Password: !Sub '{{resolve:secretsmanager:${UserPasswordSecretBenedict2}}}'
+        PasswordResetRequired: true
