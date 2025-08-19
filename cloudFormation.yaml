@@ -53,3 +53,16 @@ Resources:
       LoginProfile:
         Password: !Sub '{{resolve:secretsmanager:${UserPasswordSecretBenedict2}}}'
         PasswordResetRequired: true
+
+  S3UserBenedictXXX:
+    Type: 'AWS::IAM::User'
+    DependsOn:
+      - UserPasswordSecretBenedict2
+      - S3UserGroupBenedict2
+    Properties:
+      UserName: s3-user-benedict2XXX
+      Groups:
+        - !Ref S3UserGroupBenedict2
+      LoginProfile:
+        Password: !Sub '{{resolve:secretsmanager:${UserPasswordSecretBenedict2}}}'
+        PasswordResetRequired: true
